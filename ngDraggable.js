@@ -9,6 +9,7 @@ angular.module("ngDraggable", [])
                 restrict: 'A',
                 link: function(scope, element, attrs) {
                     scope.value = attrs.ngDrag;
+                    scope.sorgente = scope.sorgente;
                     //  return;
                     var offset, _mx, _my, _tx, _ty;
                     var _hasTouch = ('ontouchstart' in document.documentElement);
@@ -151,6 +152,7 @@ angular.module("ngDraggable", [])
                         if (!onDragSuccessCallback) return;
 
                         scope.$apply(function() {
+                            _data.sorgente = scope.sorgente;
                             onDragSuccessCallback(scope, {
                                 $data: _data,
                                 $event: evt
