@@ -238,6 +238,17 @@ angular.module("ngDraggable", [])
                                     $data: obj.data,
                                     $event: evt
                                 });
+                                if(attrs.ngSorgente !== undefined){
+                                    // element.html('<input type="button" value="'+scope.obj.contenuto+'"></input> ')
+                                    // element.css('display', 'block')
+                                    element.parent().removeClass('blocco')
+                                    element.removeClass('blocco')
+                                    element.parent().removeClass('blocco')
+                                    var allineamento = scope.obj.allineamento;
+                                    element.parent().css({ display: allineamento})
+                                    element.css({ display: allineamento})
+                                }
+                                // console.log(scope, attrs, obj, element)
                             });
 
 
