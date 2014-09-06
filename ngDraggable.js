@@ -16,6 +16,7 @@ angular.module("ngDraggable", [])
                     var _pressEvents = 'touchstart mousedown';
                     var _moveEvents = 'touchmove mousemove';
                     var _releaseEvents = 'touchend mouseup';
+                    var _dblClickEvents = 'dblclick';
 
                     var $document = $(document);
                     var $window = $(window);
@@ -43,6 +44,7 @@ angular.module("ngDraggable", [])
                         attrs.$observe("ngDrag", onEnableChange);
                         scope.$watch(attrs.ngDragData, onDragDataChange);
                         element.on(_pressEvents, onpress);
+                        element.on(_dblClickEvents, ondblclick);
                         if (!_hasTouch) {
                             element.on('mousedown', function() {
                                 return false;
@@ -80,6 +82,16 @@ angular.module("ngDraggable", [])
                         }
 
                     }
+                    var ondblclick = function(evt) {
+                        console.log('ondblclick');
+                        _dragEnabled = !_dragEnabled;
+
+                        $rootScope.$broadcast('draggable:dblclick', {
+                            dragEnabled: _dragEnabled,
+                            element: element,
+                            data: _data
+                        });
+                    };
                     var cancelPress = function() {
                         clearTimeout(_pressTimer);
                         $document.off(_moveEvents, cancelPress);
