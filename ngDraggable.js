@@ -83,14 +83,18 @@ angular.module("ngDraggable", [])
 
                     }
                     var ondblclick = function(evt) {
-                        console.log('ondblclick');
                         _dragEnabled = !_dragEnabled;
-
-                        $rootScope.$broadcast('draggable:dblclick', {
-                            dragEnabled: _dragEnabled,
-                            element: element,
-                            data: _data
-                        });
+                        console.log(_data.sorgente)
+                        if(_data.sorgente === "reorder"){
+                            element.prop('contenteditable', !_dragEnabled);
+                            element.focus();
+                        }else{
+                            $rootScope.$broadcast('draggable:dblclick', {
+                                dragEnabled: _dragEnabled,
+                                element: element,
+                                data: _data
+                            });                            
+                        }
                     };
                     var cancelPress = function() {
                         clearTimeout(_pressTimer);
