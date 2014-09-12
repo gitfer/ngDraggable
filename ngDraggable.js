@@ -1,10 +1,11 @@
+'use strict';
 /*
  *
  * https://github.com/fatlinesofcode/ngDraggable
  */
-angular.module("ngDraggable", [])
-    .directive('ngDrag', ['$rootScope', '$parse',
-        function($rootScope, $parse) {
+angular.module('ngDraggable', [])
+    .directive('ngDrag', ['$rootScope', '$parse', '$compile',
+        function($rootScope, $parse, $compile) {
             return {
                 restrict: 'A',
                 link: function(scope, element, attrs) {
@@ -37,11 +38,13 @@ angular.module("ngDraggable", [])
                     var toggleListeners = function(enable) {
                         // remove listeners
 
-                        if (!enable) return;
+                        if (!enable){
+                            return;
+                        }
                         // add listeners.
 
                         scope.$on('$destroy', onDestroy);
-                        attrs.$observe("ngDrag", onEnableChange);
+                        attrs.$observe('ngDrag', onEnableChange);
                         scope.$watch(attrs.ngDragData, onDragDataChange);
                         element.on(_pressEvents, onpress);
                         element.on(_dblClickEvents, ondblclick);
@@ -51,23 +54,24 @@ angular.module("ngDraggable", [])
                             }); // prevent native drag
                         }
                     };
-                    var onDestroy = function(enable) {
+                    var onDestroy = function() {
                         toggleListeners(false);
                     };
-                    var onDragDataChange = function(newVal, oldVal) {
+                    var onDragDataChange = function(newVal) {
                         _data = newVal;
-                    }
-                    var onEnableChange = function(newVal, oldVal) {
-                            _dragEnabled = scope.$eval(newVal);
+                    };
+                    var onEnableChange = function(newVal) {
+                        _dragEnabled = scope.$eval(newVal);
 
-                        }
-                        /*
-                         * When the element is clicked start the drag behaviour
-                         * On touch devices as a small delay so as not to prevent native window scrolling
-                         */
+                    };
+                    /*
+                     * When the element is clicked start the drag behaviour
+                     * On touch devices as a small delay so as not to prevent native window scrolling
+                     */
                     var onpress = function(evt) {
-                        if (!_dragEnabled) return;
-
+                        if (!_dragEnabled){
+                            return;
+                        }
 
                         if (_hasTouch) {
                             cancelPress();
@@ -81,28 +85,52 @@ angular.module("ngDraggable", [])
                             onlongpress(evt);
                         }
 
-                    }
-                    var ondblclick = function(evt) {
+                    };
+                    var ondblclick = function() {
                         _dragEnabled = !_dragEnabled;
-                        console.log(_data.sorgente)
-                        if(_data.sorgente === "reorder"){
-                            element.prop('contenteditable', !_dragEnabled);
-                            element.focus();
-                        }else{
+                        if (_data.sorgente === 'reorder') {
+                            $document.off(_moveEvents, cancelPress);
+                            $document.off(cancelPress);
+                            if (!_dragEnabled) {
+                                var myDiv = element.find('div');
+                                var content = myDiv.html();
+                                var newHtml = '<div id=\"prova\" ui-tinymce=\"tinymceOptions\" ng-model=\"editvalue\" ></div>';
+                                var el = angular.element(newHtml);
+                                var test = $compile(el);
+                                element.html(el);
+                                test(scope);
+
+                                $rootScope.$broadcast('setEdit:dblclick', {
+                                    data: _data,
+                                    contenuto: content
+                                });
+
+                            } else {
+                                $document.on(_moveEvents, cancelPress);
+                                $document.on(cancelPress);
+                                _data.contenuto = tinymce.get('prova').getContent();
+
+                                $rootScope.$broadcast('finishEdit:dblclick', {
+                                    data: _data
+                                });
+                            }
+                        } else {
                             $rootScope.$broadcast('draggable:dblclick', {
                                 dragEnabled: _dragEnabled,
                                 element: element,
                                 data: _data
-                            });                            
+                            });
                         }
                     };
                     var cancelPress = function() {
                         clearTimeout(_pressTimer);
                         $document.off(_moveEvents, cancelPress);
                         $document.off(_releaseEvents, cancelPress);
-                    }
+                    };
                     var onlongpress = function(evt) {
-                        if (!_dragEnabled) return;
+                        if (!_dragEnabled) {
+                            return;
+                        }
                         evt.preventDefault();
                         offset = element.offset();
                         element.centerX = (element.width() / 2);
@@ -110,7 +138,7 @@ angular.module("ngDraggable", [])
                         element.addClass('dragging');
                         _mx = (evt.pageX || evt.originalEvent.touches[0].pageX);
                         _my = (evt.pageY || evt.originalEvent.touches[0].pageY);
-                        _tx = _mx - element.centerX - $window.scrollLeft()
+                        _tx = _mx - element.centerX - $window.scrollLeft();
                         _ty = _my - element.centerY - $window.scrollTop();
                         moveElement(_tx, _ty);
                         $document.on(_moveEvents, onmove);
@@ -124,14 +152,16 @@ angular.module("ngDraggable", [])
                             data: _data
                         });
 
-                    }
+                    };
                     var onmove = function(evt) {
-                        if (!_dragEnabled) return;
+                        if (!_dragEnabled){
+                            return;
+                        }  
                         evt.preventDefault();
 
                         _mx = (evt.pageX || evt.originalEvent.touches[0].pageX);
                         _my = (evt.pageY || evt.originalEvent.touches[0].pageY);
-                        _tx = _mx - element.centerX - $window.scrollLeft()
+                        _tx = _mx - element.centerX - $window.scrollLeft();
                         _ty = _my - element.centerY - $window.scrollTop();
                         moveElement(_tx, _ty);
 
@@ -144,9 +174,11 @@ angular.module("ngDraggable", [])
                             data: _data
                         });
 
-                    }
+                    };
                     var onrelease = function(evt) {
-                        if (!_dragEnabled) return;
+                        if (!_dragEnabled){
+                          return;  
+                        } 
                         evt.preventDefault();
                         $rootScope.$broadcast('draggable:end', {
                             x: _mx,
@@ -161,12 +193,12 @@ angular.module("ngDraggable", [])
                         reset();
                         $document.off(_moveEvents, onmove);
                         $document.off(_releaseEvents, onrelease);
-
-                    }
+                    };
                     var onDragComplete = function(evt) {
 
-                        if (!onDragSuccessCallback) return;
-
+                        if (!onDragSuccessCallback) {
+                            return;
+                        }
                         scope.$apply(function() {
                             _data.sorgente = scope.sorgente;
                             onDragSuccessCallback(scope, {
@@ -174,7 +206,7 @@ angular.module("ngDraggable", [])
                                 $event: evt
                             });
                         });
-                    }
+                    };
                     var reset = function() {
                         element.css({
                             left: '',
@@ -182,7 +214,7 @@ angular.module("ngDraggable", [])
                             position: '',
                             'z-index': ''
                         });
-                    }
+                    };
                     var moveElement = function(x, y) {
                         element.css({
                             left: x,
@@ -190,10 +222,10 @@ angular.module("ngDraggable", [])
                             position: 'fixed',
                             'z-index': 99999
                         });
-                    }
+                    };
                     initialize();
                 }
-            }
+            };
         }
     ])
     .directive('ngDrop', ['$parse', '$timeout',
@@ -214,31 +246,39 @@ angular.module("ngDraggable", [])
                     var toggleListeners = function(enable) {
                         // remove listeners
 
-                        if (!enable) return;
+                        if (!enable){
+                          return;  
+                        } 
                         // add listeners.
-                        attrs.$observe("ngDrop", onEnableChange);
+                        attrs.$observe('ngDrop', onEnableChange);
                         scope.$on('$destroy', onDestroy);
                         //scope.$watch(attrs.uiDraggable, onDraggableChange);
                         scope.$on('draggable:start', onDragStart);
                         scope.$on('draggable:move', onDragMove);
                         scope.$on('draggable:end', onDragEnd);
                     };
-                    var onDestroy = function(enable) {
+                    var onDestroy = function() {
                         toggleListeners(false);
                     };
-                    var onEnableChange = function(newVal, oldVal) {
+                    var onEnableChange = function(newVal) {
                         _dropEnabled = scope.$eval(newVal);
-                    }
+                    };
                     var onDragStart = function(evt, obj) {
-                        if (!_dropEnabled) return;
+                        if (!_dropEnabled) {
+                            return;
+                        }
                         isTouching(obj.x, obj.y, obj.element);
-                    }
+                    };
                     var onDragMove = function(evt, obj) {
-                        if (!_dropEnabled) return;
+                        if (!_dropEnabled){
+                            return;
+                        }
                         isTouching(obj.x, obj.y, obj.element);
-                    }
+                    };
                     var onDragEnd = function(evt, obj) {
-                        if (!_dropEnabled) return;
+                        if (!_dropEnabled){
+                             return;
+                        }
                         if (isTouching(obj.x, obj.y, obj.element)) {
                             // call the ngDraggable element callback
                             if (obj.callback) {
@@ -254,28 +294,29 @@ angular.module("ngDraggable", [])
                                     $data: obj.data,
                                     $event: evt
                                 });
-                                if(attrs.ngSorgente !== undefined){
+                                if (attrs.ngSorgente !== undefined) {
                                     // element.html('<input type="button" value="'+scope.obj.contenuto+'"></input> ')
                                     // element.css('display', 'block')
-                                    element.parent().removeClass('blocco')
-                                    element.removeClass('blocco')
-                                    element.parent().removeClass('blocco')
+                                    element.parent().removeClass('blocco');
+                                    element.removeClass('blocco');
+                                    element.parent().removeClass('blocco');
                                     var allineamento = scope.obj.allineamento;
-                                    element.parent().css({ display: allineamento})
-                                    element.css({ display: allineamento})
+                                    element.parent().css({
+                                        display: allineamento
+                                    });
+                                    element.css({
+                                        display: allineamento
+                                    });
                                 }
-                                // console.log(scope, attrs, obj, element)
                             });
-
-
                         }
                         updateDragStyles(false, obj.element);
-                    }
+                    };
                     var isTouching = function(mouseX, mouseY, dragElement) {
                         var touching = hitTest(mouseX, mouseY);
                         updateDragStyles(touching, dragElement);
                         return touching;
-                    }
+                    };
                     var updateDragStyles = function(touching, dragElement) {
                         if (touching) {
                             element.addClass('drag-enter');
@@ -284,24 +325,24 @@ angular.module("ngDraggable", [])
                             element.removeClass('drag-enter');
                             dragElement.removeClass('drag-over');
                         }
-                    }
+                    };
                     var hitTest = function(x, y) {
                         var bounds = element.offset();
                         bounds.right = bounds.left + element.outerWidth();
                         bounds.bottom = bounds.top + element.outerHeight();
                         return x >= bounds.left && x <= bounds.right && y <= bounds.bottom && y >= bounds.top;
-                    }
+                    };
 
                     initialize();
                 }
-            }
+            };
         }
     ])
-    .directive('ngDragClone', ['$parse', '$timeout',
-        function($parse, $timeout) {
+    .directive('ngDragClone', [
+        function() {
             return {
                 restrict: 'A',
-                link: function(scope, element, attrs) {
+                link: function(scope, element) {
                     var img;
                     scope.clonedData = {};
                     var initialize = function() {
@@ -317,7 +358,9 @@ angular.module("ngDraggable", [])
                     var toggleListeners = function(enable) {
                         // remove listeners
 
-                        if (!enable) return;
+                        if (!enable) {
+                            return;
+                        }
                         // add listeners.
                         scope.$on('draggable:start', onDragStart);
                         scope.$on('draggable:move', onDragMove);
@@ -330,7 +373,7 @@ angular.module("ngDraggable", [])
                         img.off('mousedown touchstart touchmove touchend touchcancel', absorbEvent_);
                         //  element.on('mousedown touchstart touchmove touchend touchcancel', absorbEvent_);
                         img.on('mousedown touchstart touchmove touchend touchcancel', absorbEvent_);
-                    }
+                    };
                     var onDragStart = function(evt, obj) {
                         scope.$apply(function() {
                             scope.clonedData = obj.data;
@@ -339,14 +382,13 @@ angular.module("ngDraggable", [])
                         element.css('height', obj.element.height());
 
                         moveElement(obj.tx, obj.ty);
-                    }
+                    };
                     var onDragMove = function(evt, obj) {
                         moveElement(obj.tx, obj.ty);
-                    }
-                    var onDragEnd = function(evt, obj) {
-                        //moveElement(obj.tx,obj.ty);
+                    };
+                    var onDragEnd = function() {
                         reset();
-                    }
+                    };
 
                     var reset = function() {
                         element.css({
@@ -356,7 +398,7 @@ angular.module("ngDraggable", [])
                             'z-index': -1,
                             visibility: 'hidden'
                         });
-                    }
+                    };
                     var moveElement = function(x, y) {
                         element.css({
                             left: x,
@@ -365,7 +407,7 @@ angular.module("ngDraggable", [])
                             'z-index': 99999,
                             visibility: 'visible'
                         });
-                    }
+                    };
 
                     var absorbEvent_ = function(event) {
                         var e = event.originalEvent;
@@ -374,18 +416,18 @@ angular.module("ngDraggable", [])
                         e.cancelBubble = true;
                         e.returnValue = false;
                         return false;
-                    }
+                    };
 
                     initialize();
                 }
-            }
+            };
         }
     ])
-    .directive('ngPreventDrag', ['$parse', '$timeout',
-        function($parse, $timeout) {
+    .directive('ngPreventDrag', [
+        function() {
             return {
                 restrict: 'A',
-                link: function(scope, element, attrs) {
+                link: function(scope, element) {
                     var initialize = function() {
 
                         element.attr('draggable', 'false');
@@ -396,7 +438,9 @@ angular.module("ngDraggable", [])
                     var toggleListeners = function(enable) {
                         // remove listeners
 
-                        if (!enable) return;
+                        if (!enable) {
+                            return;
+                        }
                         // add listeners.
                         element.on('mousedown touchstart touchmove touchend touchcancel', absorbEvent_);
                     };
@@ -409,10 +453,10 @@ angular.module("ngDraggable", [])
                         e.cancelBubble = true;
                         e.returnValue = false;
                         return false;
-                    }
+                    };
 
                     initialize();
                 }
-            }
+            };
         }
     ]);
