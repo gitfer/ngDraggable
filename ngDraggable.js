@@ -88,18 +88,19 @@ angular.module('ngDraggable', [])
                     };
                     var ondblclick = function() {
                         _dragEnabled = !_dragEnabled;
+        
                         if (_data.sorgente === 'reorder') {
                             $document.off(_moveEvents, cancelPress);
                             $document.off(cancelPress);
                             if (!_dragEnabled) {
-                                var myDiv = element.find('div');
+                                var myDiv = element.find('div.contentEl > div');
                                 var content = myDiv.html();
-                                var newHtml = '<div id=\"prova\" ui-tinymce=\"tinymceOptions\" ng-model=\"editvalue\" ></div>';
+                                myDiv.hide();
+                                var newHtml = '<div class=\"editorEl\" id=\"prova\" ui-tinymce=\"tinymceOptions\" ng-model=\"editvalue\" >'+content+'</div>';
                                 var el = angular.element(newHtml);
                                 var test = $compile(el);
-                                element.html(el);
+                                element.append(el);
                                 test(scope);
-
                                 $rootScope.$broadcast('setEdit:dblclick', {
                                     data: _data,
                                     contenuto: content
@@ -108,8 +109,11 @@ angular.module('ngDraggable', [])
                             } else {
                                 $document.on(_moveEvents, cancelPress);
                                 $document.on(cancelPress);
+                                element.find('div.contentEl > div').show();
+                                console.log('element.length',element.find('.editorEl').length);
+                                element.find('.editorEl').remove();
+                                element.find('.mce-tinymce').remove();
                                 _data.contenuto = tinymce.get('prova').getContent();
-
                                 $rootScope.$broadcast('finishEdit:dblclick', {
                                     data: _data
                                 });
