@@ -110,7 +110,6 @@ angular.module('ngDraggable', [])
                                 $document.on(_moveEvents, cancelPress);
                                 $document.on(cancelPress);
                                 element.find('div.contentEl > div').show();
-                                console.log('element.length',element.find('.editorEl').length);
                                 element.find('.editorEl').remove();
                                 element.find('.mce-tinymce').remove();
                                 _data.contenuto = tinymce.get('prova').getContent();
