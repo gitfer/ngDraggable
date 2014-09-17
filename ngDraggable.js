@@ -102,7 +102,7 @@ angular.module('ngDraggable', [])
                                 var myDiv = element.find('div.contentEl > div');
                                 var content = myDiv.html();
                                 myDiv.hide();
-                                var newHtml = '<div class=\"editorEl\" id=\"prova\" ui-tinymce=\"tinymceOptions\" ng-model=\"editvalue\" >'+content+'</div>';
+                                var newHtml = '<div class=\"editorEl\" id=\"elemento'+_data.id+'\" ui-tinymce=\"tinymceOptions\" ng-model=\"editvalue\" >'+content+'</div>';
                                 var el = angular.element(newHtml);
                                 var test = $compile(el);
                                 element.append(el);
@@ -118,7 +118,7 @@ angular.module('ngDraggable', [])
                                 element.find('div.contentEl > div').show();
                                 element.find('.editorEl').remove();
                                 element.find('.mce-tinymce').remove();
-                                _data.contenuto = tinymce.get('prova').getContent();
+                                _data.contenuto = tinymce.get('elemento'+_data.id).getContent();
                                 $rootScope.$broadcast('finishEdit:dblclick', {
                                     data: _data
                                 });
