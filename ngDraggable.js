@@ -4,6 +4,12 @@
  * https://github.com/fatlinesofcode/ngDraggable
  */
 angular.module('ngDraggable', [])
+    .directive('ngDraggableElement', [function () {
+        return {
+            restrict: 'E',
+            templateUrl: document.querySelector("script[src$='ngDraggable.js']").src.replace('ngDraggable.js', 'template/ngDraggableElement.html'),
+        };
+    }])
     .directive('ngDrag', ['$rootScope', '$parse', '$compile',
         function($rootScope, $parse, $compile) {
             return {
