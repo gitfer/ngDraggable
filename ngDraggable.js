@@ -8,6 +8,7 @@ angular.module('ngDraggable', [])
         function($parse, $timeout) {
             return {
                 restrict: 'E',
+                replace: true,
                 scope: {
                     droppa: '&',
                     riordina: '&',

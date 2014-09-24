@@ -1,5 +1,5 @@
 
-<td align="left" valign="top" style="font-size:13px; line-height: 20px; font-family: Arial, sans-serif; min-height: 20px;" ng-drop="true" ng-drop-success="droppa({$data: $data, $event: $event})" ng-drop-id-collection="{{idAreaDroppabile}}" >
+<td class="panel" ng-drop="true" ng-drop-success="droppa({$data: $data, $event: $event})" ng-drop-id-collection="{{idAreaDroppabile}}" >
     <span ng-repeat="obj in elementidroppati track by $index" ng-drag="true" ng-drag-data="obj" ng-sorgente="reorder" ng-drop="true" ng-drop-success="riordina({$index:$index, $data: $data, $event: $event})" class="blocco">
         <div class="contentEl">
             <div ng-bind-html="obj.contenuto" ng-show="obj.type!=='button' && obj.type!=='textarea' "></div>
