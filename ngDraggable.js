@@ -4,8 +4,17 @@
  * https://github.com/fatlinesofcode/ngDraggable
  */
 angular.module('ngDraggable', [])
-    .directive('ngDraggableElement', [ '$parse', '$timeout',
-        function($parse, $timeout) {
+    .directive('ngDraggableElement', [ '$compile', '$http', '$templateCache', '$parse', '$timeout',
+        function($compile, $http, $templateCache, $parse, $timeout) {
+
+            var getTemplate = function(type) {
+                var templateLoader,
+                baseUrl = 'bower_components/ngDraggable/template/ngDraggableElement';
+                var templateUrl = baseUrl + type + '.html';
+                templateLoader = $http.get(templateUrl, {cache: $templateCache});
+                return templateLoader;
+            };
+
             return {
                 restrict: 'E',
                 replace: true,
@@ -13,10 +22,19 @@ angular.module('ngDraggable', [])
                     droppa: '&',
                     riordina: '&',
                     elementidroppati: '=',
-                    idAreaDroppabile: '@'
+                    idAreaDroppabile: '@',
+                    className: '@',
+                    type: '@'
                 },
-                templateUrl: document.querySelector("script[src$='ngDraggable.js']").src.replace('ngDraggable.js', 'template/ngDraggableElement.html'),
+                // templateUrl: document.querySelector("script[src$='ngDraggable.js']").src.replace('ngDraggable.js', 'template/ngDraggableElement{{type}}.html'),
                 link: function(scope, element, attrs) {
+                    var templateType = attrs.type || '';
+                    var loader = getTemplate(templateType);
+                    var promise = loader.success(function(html) {
+                        element.html(html);
+                    }).then(function (response) {
+                        element.replaceWith($compile(element.html())(scope));
+                    });
                 }
             };
         }

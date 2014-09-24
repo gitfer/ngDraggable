@@ -1,11 +1,11 @@
 
 <td class="{{className}}" ng-drop="true" ng-drop-success="droppa({$data: $data, $event: $event})" ng-drop-id-collection="{{idAreaDroppabile}}" >
     <span ng-repeat="obj in elementidroppati track by $index" ng-drag="true" ng-drag-data="obj" ng-sorgente="reorder" ng-drop="true" ng-drop-success="riordina({$index:$index, $data: $data, $event: $event})" class="blocco">
-        <div class="contentEl">
-            <div ng-bind-html="obj.contenuto" ng-show="obj.type!=='button' && obj.type!=='textarea' "></div>
-            <div ng-show="obj.type==='button'">
+        <span class="contentEl">
+            <span ng-bind-html="obj.contenuto" ng-show="obj.type!=='button' && obj.type!=='textarea' "></span>
+            <span ng-show="obj.type==='button'">
                 <button>{{obj.contenuto}}</button>
-            </div>
-        </div>
+            </span>
+        </span>
     </span>
 </td>
