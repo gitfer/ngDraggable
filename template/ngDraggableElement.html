@@ -3,7 +3,6 @@
     <span ng-repeat="obj in elementidroppati track by $index" ng-drag="true" ng-drag-data="obj" ng-sorgente="reorder" ng-drop="true" ng-drop-success="riordina({$index:$index, $data: $data, $event: $event})" class="blocco">
         <div class="contentEl">
             <div ng-bind-html="obj.contenuto" ng-show="obj.type!=='button' && obj.type!=='textarea' "></div>
-            <p>{{obj.id}}  - {{obj.ngDropIdCollection}}</p>
             <div ng-show="obj.type==='button'">
                 <button>{{obj.contenuto}}</button>
             </div>
