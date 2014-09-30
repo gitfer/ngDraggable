@@ -1,4 +1,4 @@
-<td align="center" class="{{className}}" ng-drop="true" ng-drop-success="droppa({$data: $data, $event: $event})" ng-drop-id-collection="{{idAreaDroppabile}}">
+<div align="center" style="{{styleInline}}" class="{{className}}" ng-drop="true" ng-drop-success="droppa({$data: $data, $event: $event})" ng-drop-id-collection="{{idAreaDroppabile}}">
     <center>
         <p style="text-align:center;">
             <span ng-repeat="obj in elementidroppati track by $index" ng-drag="true" ng-drag-data="obj" ng-sorgente="reorder" ng-drop="true" ng-drop-success="riordina({$index:$index, $data: $data, $event: $event})" class="blocco">
@@ -11,4 +11,4 @@
             </span>
         </p>
     </center>
-</td>
+</div>

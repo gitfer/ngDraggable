@@ -17,13 +17,13 @@ angular.module('ngDraggable', [])
 
             return {
                 restrict: 'E',
-                replace: true,
                 scope: {
                     droppa: '&',
                     riordina: '&',
                     elementidroppati: '=',
                     idAreaDroppabile: '@',
                     className: '@',
+                    styleInline: '@',
                     type: '@'
                 },
                 // templateUrl: document.querySelector("script[src$='ngDraggable.js']").src.replace('ngDraggable.js', 'template/ngDraggableElement{{type}}.html'),
