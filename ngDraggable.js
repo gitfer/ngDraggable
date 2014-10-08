@@ -4,17 +4,17 @@
  * https://github.com/fatlinesofcode/ngDraggable
  */
 angular.module('ngDraggable', [])
-    .directive('ngDraggableElement', [ '$compile', '$http', '$templateCache', '$parse', '$timeout',
+    .directive('ngDraggableElement', ['$compile', '$http', '$templateCache', '$parse', '$timeout',
         function($compile, $http, $templateCache, $parse, $timeout) {
-
             var getTemplate = function(type) {
                 var templateLoader,
-                baseUrl = 'bower_components/ngDraggable/template/ngDraggableElement';
+                    baseUrl = 'bower_components/ngDraggable/template/ngDraggableElement';
                 var templateUrl = baseUrl + type + '.html';
-                templateLoader = $http.get(templateUrl, {cache: $templateCache});
+                templateLoader = $http.get(templateUrl, {
+                    cache: $templateCache
+                });
                 return templateLoader;
             };
-
             return {
                 restrict: 'E',
                 scope: {
@@ -26,26 +26,33 @@ angular.module('ngDraggable', [])
                     styleInline: '@',
                     type: '@'
                 },
-                // templateUrl: document.querySelector("script[src$='ngDraggable.js']").src.replace('ngDraggable.js', 'template/ngDraggableElement{{type}}.html'),
                 link: function(scope, element, attrs) {
                     var templateType = attrs.type || '';
                     var loader = getTemplate(templateType);
                     var promise = loader.success(function(html) {
+
                         element.html(html);
-                    }).then(function (response) {
-                        element.replaceWith($compile(element.html())(scope));
+                    }).then(function(response) {
+
+                        var el = $compile(element.html())(scope);
+                        element.replaceWith(el);
                     });
                 }
             };
         }
     ])
-    .directive('ngDrag', ['$rootScope', '$parse', '$compile',
-        function($rootScope, $parse, $compile) {
+    .directive('ngDrag', ['$rootScope', '$parse', '$compile', '$timeout',
+        function($rootScope, $parse, $compile, $timeout) {
             return {
                 restrict: 'A',
                 link: function(scope, element, attrs) {
                     scope.value = attrs.ngDrag;
                     scope.sorgente = attrs.ngSorgente;
+                    scope.optsEditor = {
+                        directionality: 'ltr',
+                        plugins: 'code',
+                        toolbar: 'styleselect bold italic print forecolor backcolor'
+                    };
                     scope.ngDropIdCollection = attrs.ngDropIdCollection || scope.$parent.idAreaDroppabile;
                     //  return;
                     var offset, _mx, _my, _tx, _ty;
@@ -83,7 +90,6 @@ angular.module('ngDraggable', [])
                         attrs.$observe('ngDrag', onEnableChange);
                         scope.$watch(attrs.ngDragData, onDragDataChange);
                         element.on(_pressEvents, onpress);
-                        element.on(_dblClickEvents, ondblclick);
                         if (!_hasTouch) {
                             element.on('mousedown', function() {
                                 return false;
@@ -105,6 +111,12 @@ angular.module('ngDraggable', [])
                      * On touch devices as a small delay so as not to prevent native window scrolling
                      */
                     var onpress = function(evt) {
+
+                        if (evt.shiftKey &&  _data.sorgente === "reorder") {
+                            ondblclick();
+                            return;
+                        }
+
                         if (!_dragEnabled) {
                             return;
                         }
@@ -122,36 +134,56 @@ angular.module('ngDraggable', [])
                         }
 
                     };
-                    var ondblclick = function() {
-                        _dragEnabled = !_dragEnabled;
+                    var createId = function(callback) {
+                        callback(scope.$id + Math.random(new Date() * Math.random()) * 100000000000000000);
+                    };
 
+                    var compileEditor = function(contenuto) {
+                        createId(function(id) {
+                            var el = angular.element('<div class="editorEl" id=\"' + id + '\" ui-tinymce="{{optsEditor}}" ng-model="editorContent"></div>');
+                            var l = $compile(el);
+                            element.append(el);
+                            l(scope);
+
+                            $timeout(function() {
+                                if (tinymce.get(id) !== undefined) {
+                                    tinymce.get(id).setContent(contenuto);
+                                }
+                                $rootScope.$broadcast('idEditor:changed', {
+                                    id: scope.obj.id,
+                                    idCollection: scope.obj.ngDropIdCollection,
+                                    idEditor: id
+                                });
+                            }, 800);
+                        });
+                    };
+                    var ondblclick = function() {
+                        _dragEnabled = false;
                         if (_data.sorgente === 'reorder') {
-                            $document.off(_moveEvents, cancelPress);
-                            $document.off(cancelPress);
-                            if (!_dragEnabled) {
-                                var myDiv = element.find('div.contentEl > div');
-                                var content = myDiv.html();
-                                myDiv.hide();
-                                var newHtml = '<div class=\"editorEl\" id=\"elemento' + _data.id + '\" ui-tinymce=\"tinymceOptions\" ng-model=\"editvalue\" >' + content + '</div>';
-                                var el = angular.element(newHtml);
-                                var test = $compile(el);
-                                element.append(el);
-                                test(scope);
+                            var editor = tinymce.get(scope.obj.idEditor);
+                            if (editor === undefined || editor.length === 0) {
+                                element.find('.contentEl > div').hide();
+
+                                var contenuto = scope.obj.contenuto;
+                                // Creo l'editor
+                                compileEditor(contenuto);
+
                                 $rootScope.$broadcast('setEdit:dblclick', {
                                     data: _data,
-                                    contenuto: content
+                                    contenuto: contenuto
                                 });
-
                             } else {
-                                $document.on(_moveEvents, cancelPress);
-                                $document.on(cancelPress);
-                                element.find('div.contentEl > div').show();
+                                element.find('.contentEl > div').show();
+                                _data.contenuto = editor.getContent();
+
+                                // Rimuovo tutto quello che riguarda l'editor
                                 element.find('.editorEl').remove();
-                                element.find('.mce-tinymce').remove();
-                                _data.contenuto = tinymce.get('elemento' + _data.id).getContent();
+                                tinyMCE.remove();
+
                                 $rootScope.$broadcast('finishEdit:dblclick', {
                                     data: _data
                                 });
+                                _dragEnabled = true;
                             }
                         } else {
                             $rootScope.$broadcast('draggable:dblclick', {
