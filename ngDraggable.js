@@ -3,7 +3,7 @@
  *
  * https://github.com/fatlinesofcode/ngDraggable
  */
-angular.module('ngDraggable', [])
+angular.module('ngDraggable', ['angularUtils'])
     .directive('ngDraggableElement', ['$compile', '$http', '$templateCache', '$parse', '$timeout',
         function($compile, $http, $templateCache, $parse, $timeout) {
             var getTemplate = function(type) {
