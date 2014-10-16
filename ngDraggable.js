@@ -158,7 +158,7 @@ angular.module('ngDraggable', ['angularUtils'])
                         _dragEnabled = false;
                         if (_data.sorgente === 'reorder') {
                             var editor = tinymce.get(scope.obj.idEditor);
-                            if (editor === undefined || editor.length === 0) {
+                            if (editor === null || editor.length === 0) {
                                 element.find('.contentEl > div').hide();
 
                                 var contenuto = scope.obj.contenuto;
