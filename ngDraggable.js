@@ -4,8 +4,8 @@
  * https://github.com/fatlinesofcode/ngDraggable
  */
 angular.module('ngDraggable', ['angularUtils'])
-    .directive('ngDraggableElement', ['$compile', '$http', '$templateCache', '$parse', '$timeout',
-        function($compile, $http, $templateCache, $parse, $timeout) {
+    .directive('ngDraggableElement', ['$compile', '$http', '$templateCache', 
+        function($compile, $http, $templateCache) {
             var getTemplate = function(type) {
                 var templateLoader,
                     baseUrl = 'bower_components/ngDraggable/template/ngDraggableElement';
@@ -29,11 +29,9 @@ angular.module('ngDraggable', ['angularUtils'])
                 link: function(scope, element, attrs) {
                     var templateType = attrs.type || '';
                     var loader = getTemplate(templateType);
-                    var promise = loader.success(function(html) {
-
+                    loader.success(function(html) {
                         element.html(html);
-                    }).then(function(response) {
-
+                    }).then(function() {
                         var el = $compile(element.html())(scope);
                         element.replaceWith(el);
                     });
@@ -60,7 +58,6 @@ angular.module('ngDraggable', ['angularUtils'])
                     var _pressEvents = 'touchstart mousedown';
                     var _moveEvents = 'touchmove mousemove';
                     var _releaseEvents = 'touchend mouseup';
-                    var _dblClickEvents = 'dblclick';
 
                     var $document = $(document);
                     var $window = $(window);
@@ -112,7 +109,7 @@ angular.module('ngDraggable', ['angularUtils'])
                      */
                     var onpress = function(evt) {
 
-                        if (evt.shiftKey &&  _data.sorgente === "reorder") {
+                        if (evt.shiftKey &&  _data.sorgente === 'reorder') {
                             ondblclick();
                             return;
                         }
